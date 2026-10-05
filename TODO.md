@@ -44,13 +44,13 @@ Rule: finish each phase's **Exit check** before starting the next. Don't touch d
 ---
 
 ## Phase 3: Provider layer (Issues #6, #7)
-- [ ] `providers/base.py`: `LLMProvider` Protocol (`name`, `generate`)
-- [ ] `providers/fake.py`: `FakeProvider` returning scripted responses
-- [ ] `providers/gemini.py`: read `GEMINI_API_KEY`, call model, wrap errors in `ProviderError`
-- [ ] Retry with backoff (max 3) for rate limits/timeouts
-- [ ] Ensure the key never appears in logs or exceptions
-- [ ] Tests (offline): FakeProvider behavior, error wrapping with mocked Gemini client
-- [ ] One manual smoke test against real Gemini (not in CI)
+- [x] `providers/base.py`: `LLMProvider` Protocol (`name`, `generate`)
+- [x] `providers/fake.py`: `FakeProvider` returning scripted responses
+- [x] `providers/gemini.py`: read `GEMINI_API_KEY`, call model, wrap errors in `ProviderError`
+- [x] Retry with backoff (max 3) for rate limits/timeouts
+- [x] Ensure the key never appears in logs or exceptions
+- [x] Tests (offline): FakeProvider behavior, error wrapping with mocked Gemini client
+- [x] One manual smoke test against real Gemini (not in CI)
 
 **Exit check:** `GeminiProvider().generate("Say hi")` returns text; core code has zero Gemini imports.
 
