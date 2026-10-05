@@ -1,0 +1,198 @@
+# TODO: AI Dev Toolkit (phase by phase)
+
+Rule: finish each phase's **Exit check** before starting the next. Don't touch dashboard/React until v0.5.
+
+---
+
+## Phase 0: Decisions and accounts
+- [ ] Confirm repo name `ai-dev-toolkit` and CLI name `ai-dev`
+- [ ] Check PyPI name availability (fallback: `ai-dev-toolkit-eval`)
+- [ ] Get a Gemini API key (store only in env var / `.env`)
+- [ ] Install Python 3.11+, Git, and `uv` or `pip` + `venv`
+- [ ] Decide open questions in PRD §14 (default model, async, reasoning default)
+
+**Exit check:** `python --version` ≥ 3.11, `git --version` works, API key set locally.
+
+---
+
+## Phase 1: Repo and scaffolding (Issue #1)
+- [ ] Create GitHub repo `H31S3NB3R4/ai-dev-toolkit` (public, MIT license)
+- [ ] Clone locally, create virtual environment
+- [ ] Create `src/ai_dev_toolkit/` with `__init__.py` and `py.typed`
+- [ ] Create folders: `core/`, `metrics/`, `providers/`, `cli/`, `tests/`, `examples/`, `docs/`
+- [ ] Write `pyproject.toml` (Hatchling, metadata, deps, `ai-dev` script entry, ruff + mypy + pytest config)
+- [ ] Add `.gitignore` (include `.env`, `.venv`, `dist/`, `__pycache__/`)
+- [ ] Stub README with tagline and "work in progress" note
+- [ ] `pip install -e ".[dev]"` works
+- [ ] First commit and push
+
+**Exit check:** `python -c "import ai_dev_toolkit"` succeeds; `ruff check .` and `pytest` run (even with zero tests).
+
+---
+
+## Phase 2: Core models and errors (Issue #2)
+- [ ] `core/errors.py`: `AIDevToolkitError`, `ProviderError`, `MetricError`
+- [ ] `core/config.py`: `EvaluatorConfig` (weights, temperature, timeout, retries)
+- [ ] `core/result.py`: `MetricResult` and `EvaluationResult` (Pydantic)
+- [ ] Clamp scores to `[0, 1]`; `hallucination` computed as `1 - faithfulness`
+- [ ] `to_dict()` and `to_json()`
+- [ ] Overall-score function with weight renormalization when faithfulness is `None`
+- [ ] Tests: validation, clamping, JSON round trip, weight renormalization
+
+**Exit check:** all core tests pass; mypy clean on `core/`.
+
+---
+
+## Phase 3: Provider layer (Issues #6, #7)
+- [ ] `providers/base.py`: `LLMProvider` Protocol (`name`, `generate`)
+- [ ] `providers/fake.py`: `FakeProvider` returning scripted responses
+- [ ] `providers/gemini.py`: read `GEMINI_API_KEY`, call model, wrap errors in `ProviderError`
+- [ ] Retry with backoff (max 3) for rate limits/timeouts
+- [ ] Ensure the key never appears in logs or exceptions
+- [ ] Tests (offline): FakeProvider behavior, error wrapping with mocked Gemini client
+- [ ] One manual smoke test against real Gemini (not in CI)
+
+**Exit check:** `GeminiProvider().generate("Say hi")` returns text; core code has zero Gemini imports.
+
+---
+
+## Phase 4: Metrics (Issues #3, #4, #5)
+- [ ] `metrics/base.py`: `Metric` base (`name`, `requires_context`, `score()`)
+- [ ] Judge prompt templates in `metrics/prompts/` (versioned, delimiter-wrapped untrusted input)
+- [ ] Strict JSON parser with one retry, then `MetricError`
+- [ ] **Relevance** metric + tests
+- [ ] **Completeness** metric (sub-question decomposition) + tests
+- [ ] **Faithfulness** metric (claim extraction + verification) + tests
+- [ ] Prompt-injection test cases in the response text
+- [ ] Build a small golden set (10-20 hand-labeled examples) in `tests/data/`
+- [ ] Sanity-check judge scores against the golden set; tune prompts
+
+**Exit check:** all metric tests pass offline with `FakeProvider`; golden set scores look reasonable on real Gemini.
+
+---
+
+## Phase 5: Evaluator and public API
+- [ ] `core/evaluator.py`: runs the metrics, aggregates scores, records latency and provider metadata
+- [ ] Run metrics concurrently (thread pool) when more than one is enabled
+- [ ] `evaluate()` convenience function exported from `__init__.py`
+- [ ] Input validation (empty prompt/response raises `ValueError`)
+- [ ] Skip faithfulness cleanly when no context is given
+- [ ] Tests: end-to-end with `FakeProvider`, with and without context, config override
+
+**Exit check:** the 3-line quickstart works end to end.
+
+---
+
+## Phase 6: CLI (Issue #8)
+- [ ] `cli/main.py` with Typer: `ai-dev evaluate`
+- [ ] Options: `--prompt`, `--response`, `--context`, `--provider`, `--json`, `--min-score`
+- [ ] Rich table output matching the PRD example
+- [ ] Exit code 1 when below `--min-score`; clear error messages for missing API key
+- [ ] `--version`
+- [ ] (P2) `--prompt-file`, `--response-file`, `--context-file`
+- [ ] Tests with Typer's `CliRunner`
+
+**Exit check:** `ai-dev evaluate --prompt "..." --response "..." --json` prints valid JSON.
+
+---
+
+## Phase 7: Quality, CI, and examples (Issues #9, #10)
+- [ ] `.github/workflows/tests.yml`: ruff, mypy, pytest + coverage on Python 3.11, 3.12, 3.13
+- [ ] Add coverage threshold (≥ 80%)
+- [ ] `examples/basic_evaluation.py`
+- [ ] `examples/rag_evaluation.py`
+- [ ] Docstrings on all public classes and functions
+- [ ] Optional example notebook
+- [ ] Pre-commit config (ruff, mypy)
+
+**Exit check:** CI green on `main`; examples run with a fresh venv.
+
+---
+
+## Phase 8: Community files
+- [ ] Full `README.md`: what/why, install, quickstart, CLI usage, JSON schema, limitations of LLM-as-judge, roadmap, badges
+- [ ] `CONTRIBUTING.md`: dev setup, running tests, how to add a metric, how to add a provider, PR process
+- [ ] `CODE_OF_CONDUCT.md` (Contributor Covenant)
+- [ ] `CHANGELOG.md` (Keep a Changelog format)
+- [ ] `.github/ISSUE_TEMPLATE/bug_report.md` and `feature_request.md`
+- [ ] `.github/pull_request_template.md`
+- [ ] Create the labels from PRD §13
+- [ ] Enable GitHub Discussions
+- [ ] Add `SECURITY.md` (how to report vulnerabilities)
+
+**Exit check:** a stranger can clone, set up, and run tests by following only CONTRIBUTING.md.
+
+---
+
+## Phase 9: Release v0.1.0
+- [ ] Final pass on the PRD §12 Definition of Done checklist
+- [ ] Bump version to `0.1.0`, update CHANGELOG
+- [ ] Build: `python -m build`; check with `twine check dist/*`
+- [ ] Publish to TestPyPI first; install in a clean venv and verify
+- [ ] Publish to PyPI (consider Trusted Publishing via GitHub Actions)
+- [ ] Tag `v0.1.0` and create a GitHub Release with notes
+- [ ] Verify `pip install ai-dev-toolkit` then run the quickstart
+
+**Exit check:** a clean machine can install from PyPI and get a score.
+
+---
+
+## Phase 10: Open issues and attract contributors
+- [ ] Create 8+ well-scoped `good first issue` tickets, for example:
+  - [ ] Add response-length evaluator
+  - [ ] Add JSON/CSV exporter
+  - [ ] Add Ollama provider
+  - [ ] Add OpenAI provider
+  - [ ] More unit tests for relevance
+  - [ ] Add `--prompt-file` CLI options
+  - [ ] Improve docs / add example notebook
+  - [ ] Add Windows install notes
+- [ ] Add `help wanted` to larger items (config file, dataset evaluation)
+- [ ] Pin a Roadmap issue or Discussion
+- [ ] Share on relevant communities (r/LocalLLaMA, r/MachineLearning showcase threads where allowed, Dev.to, LinkedIn)
+- [ ] Respond to issues/PRs within 48 hours; be kind and specific in reviews
+
+**Exit check:** first external issue or PR received.
+
+---
+
+## Phase 11: v0.2.0 (providers and config)
+- [ ] OpenAI provider
+- [ ] Ollama provider (local, free)
+- [ ] Custom metric registration API
+- [ ] Config file support (YAML/TOML)
+- [ ] Dataset evaluation (JSONL input, summary stats)
+- [ ] Async `aevaluate()` if desired
+
+## Phase 12: v0.3.0 (RAG evaluation)
+- [ ] Context relevance, context recall, answer relevance
+- [ ] Citation correctness
+- [ ] Batch evaluation, CSV/JSON datasets
+- [ ] Benchmark reports (Markdown/HTML)
+
+## Phase 13: v0.4.0 (agent evaluation)
+- [ ] Trace data model (steps, tool calls, failures)
+- [ ] Tool-call correctness metric
+- [ ] Latency/token/cost tracking
+- [ ] Execution reports
+
+## Phase 14: v0.5.0 (dashboard)
+- [ ] FastAPI backend serving stored results
+- [ ] React dashboard (scores, runs, model comparison)
+- [ ] Experiment tracking
+
+## Phase 15: v1.0.0
+- [ ] Stable public API and deprecation policy
+- [ ] Plugin system for metrics/providers
+- [ ] Docs site (MkDocs)
+
+---
+
+## Weekly rhythm suggestion
+| Week | Phases |
+|---|---|
+| 1 | 0, 1, 2 |
+| 2 | 3, 4 |
+| 3 | 5, 6 |
+| 4 | 7, 8 |
+| 5 | 9, 10 |
