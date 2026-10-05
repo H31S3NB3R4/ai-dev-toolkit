@@ -31,13 +31,13 @@ Rule: finish each phase's **Exit check** before starting the next. Don't touch d
 ---
 
 ## Phase 2: Core models and errors (Issue #2)
-- [ ] `core/errors.py`: `AIDevToolkitError`, `ProviderError`, `MetricError`
-- [ ] `core/config.py`: `EvaluatorConfig` (weights, temperature, timeout, retries)
-- [ ] `core/result.py`: `MetricResult` and `EvaluationResult` (Pydantic)
-- [ ] Clamp scores to `[0, 1]`; `hallucination` computed as `1 - faithfulness`
-- [ ] `to_dict()` and `to_json()`
-- [ ] Overall-score function with weight renormalization when faithfulness is `None`
-- [ ] Tests: validation, clamping, JSON round trip, weight renormalization
+- [x] `core/errors.py`: `AIDevToolkitError`, `ProviderError`, `MetricError`
+- [x] `core/config.py`: `EvaluatorConfig` (weights, temperature, timeout, retries)
+- [x] `core/result.py`: `MetricResult` and `EvaluationResult` (Pydantic)
+- [x] Clamp scores to `[0, 1]`; `hallucination` computed as `1 - faithfulness`
+- [x] `to_dict()` and `to_json()`
+- [x] Overall-score function with weight renormalization when faithfulness is `None`
+- [x] Tests: validation, clamping, JSON round trip, weight renormalization
 
 **Exit check:** all core tests pass; mypy clean on `core/`.
 
