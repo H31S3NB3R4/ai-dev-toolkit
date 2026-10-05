@@ -16,15 +16,15 @@ Rule: finish each phase's **Exit check** before starting the next. Don't touch d
 ---
 
 ## Phase 1: Repo and scaffolding (Issue #1)
-- [ ] Create GitHub repo `H31S3NB3R4/ai-dev-toolkit` (public, MIT license)
-- [ ] Clone locally, create virtual environment
-- [ ] Create `src/ai_dev_toolkit/` with `__init__.py` and `py.typed`
-- [ ] Create folders: `core/`, `metrics/`, `providers/`, `cli/`, `tests/`, `examples/`, `docs/`
-- [ ] Write `pyproject.toml` (Hatchling, metadata, deps, `ai-dev` script entry, ruff + mypy + pytest config)
-- [ ] Add `.gitignore` (include `.env`, `.venv`, `dist/`, `__pycache__/`)
-- [ ] Stub README with tagline and "work in progress" note
-- [ ] `pip install -e ".[dev]"` works
-- [ ] First commit and push
+- [x] Create GitHub repo `H31S3NB3R4/ai-dev-toolkit` (public, MIT license)
+- [x] Clone locally, create virtual environment
+- [x] Create `src/ai_dev_toolkit/` with `__init__.py` and `py.typed`
+- [x] Create folders: `core/`, `metrics/`, `providers/`, `cli/`, `tests/`, `examples/`, `docs/`
+- [x] Write `pyproject.toml` (Hatchling, metadata, deps, `ai-dev` script entry, ruff + mypy + pytest config)
+- [x] Add `.gitignore` (include `.env`, `.venv`, `dist/`, `__pycache__/`)
+- [x] Stub README with tagline and "work in progress" note
+- [x] `pip install -e ".[dev]"` works
+- [x] First commit and push
 
 **Exit check:** `python -c "import ai_dev_toolkit"` succeeds; `ruff check .` and `pytest` run (even with zero tests).
 
