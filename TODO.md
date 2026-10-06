@@ -157,12 +157,16 @@ Rule: finish each phase's **Exit check** before starting the next. Don't touch d
 ---
 
 ## Phase 11: v0.2.0 (providers and config)
-- [ ] OpenAI provider
-- [ ] Ollama provider (local, free)
-- [ ] Custom metric registration API
-- [ ] Config file support (YAML/TOML)
-- [ ] Dataset evaluation (JSONL input, summary stats)
-- [ ] Async `aevaluate()` if desired
+- [x] OpenAI provider
+- [x] Ollama provider (local, free)
+- [x] Custom metric registration API
+- [x] Config file support (YAML/TOML)
+- [x] Dataset evaluation (JSONL input, summary stats)
+- [x] Async `aevaluate()` if desired
+
+**Exit check:** OpenAI & Ollama providers, custom metric registry, config loading, dataset evaluation with summary statistics, and async evaluation all fully covered by automated tests.
+
+---
 
 ## Phase 12: v0.3.0 (RAG evaluation)
 - [ ] Context relevance, context recall, answer relevance

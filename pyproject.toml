@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ai-dev-toolkit"
-version = "0.1.0"
+version = "0.2.0"
 description = "Open-source evaluation and testing toolkit for LLM, RAG, and AI agents"
 readme = "README.md"
 license = { text = "MIT" }

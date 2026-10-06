@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.0] - 2026-10-07
+
+### Added
+- **New Providers**:
+  - `OpenAIProvider`: Support for OpenAI Chat Completions API (`gpt-4o-mini`, `gpt-4o`, custom models) with exponential backoff retries and API key redaction.
+  - `OllamaProvider`: Local, zero-cost LLM evaluation via Ollama HTTP API (`http://localhost:11434/api/generate`) with automatic retry support.
+- **Custom Metric Registry**:
+  - Global registry API: `register_metric`, `get_metric`, `list_metrics`, `reset_metrics`.
+  - Support for registering custom metric instances and classes subclassing `Metric`.
+- **Configuration File Loading**:
+  - `EvaluatorConfig.from_file()` supporting `.toml`, `.yaml`, `.yml`, and `.json`.
+  - `EvaluatorConfig.find_and_load()` automatic filesystem discovery for `.ai-dev.*` / `ai-dev.*` config files.
+- **Dataset Evaluation**:
+  - `evaluate_dataset()` supporting JSONL, JSON, and CSV input datasets.
+  - `DatasetEvaluationResult` with aggregated statistics (`mean`, `median`, `min`, `max`) across samples and metrics.
+  - `.to_csv()` dataset export utility for easy downstream reporting and CI/CD pipelines.
+- **Async Evaluation**:
+  - Public `aevaluate()` async API for seamless integration with modern asynchronous pipelines and async frameworks.
+
+---
+
 ## [0.1.0] - 2026-10-07
 
 ### Added

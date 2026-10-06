@@ -1,5 +1,6 @@
 """Evaluation engine and top-level execution coordination."""
 
+import asyncio
 import concurrent.futures
 import logging
 import time
@@ -32,6 +33,22 @@ def _create_default_provider(config: EvaluatorConfig) -> LLMProvider:
             timeout=config.timeout,
             max_retries=config.max_retries,
         )
+    elif provider_name == "openai":
+        from ai_dev_toolkit.providers.openai import OpenAIProvider
+
+        return OpenAIProvider(
+            model=config.model or "gpt-4o-mini",
+            timeout=config.timeout,
+            max_retries=config.max_retries,
+        )
+    elif provider_name == "ollama":
+        from ai_dev_toolkit.providers.ollama import OllamaProvider
+
+        return OllamaProvider(
+            model=config.model or "llama3",
+            timeout=config.timeout,
+            max_retries=config.max_retries,
+        )
     elif provider_name == "fake":
         from ai_dev_toolkit.providers.fake import FakeProvider
 
@@ -39,7 +56,7 @@ def _create_default_provider(config: EvaluatorConfig) -> LLMProvider:
     else:
         raise ValueError(
             f"Unsupported provider '{config.provider}'. "
-            f"Supported providers: 'gemini', 'fake'."
+            f"Supported providers: 'gemini', 'openai', 'ollama', 'fake'."
         )
 
 
@@ -61,7 +78,7 @@ class Evaluator:
         config: EvaluatorConfig | None = None,
         metrics: list[Metric] | None = None,
     ) -> None:
-        self.config = config or EvaluatorConfig()
+        self.config = config or EvaluatorConfig.find_and_load()
         self.provider = provider or _create_default_provider(self.config)
         self.metrics = metrics if metrics is not None else _get_default_metrics()
 
@@ -185,7 +202,7 @@ def evaluate(
 ) -> EvaluationResult:
     """Evaluate an LLM response against a prompt and optional context.
 
-    This is the primary public entrypoint of ai-dev-toolkit.
+    This is the primary synchronous public entrypoint of ai-dev-toolkit.
 
     Example:
         >>> from ai_dev_toolkit import evaluate
@@ -199,7 +216,7 @@ def evaluate(
         prompt: The prompt or question asked to the LLM.
         response: The LLM output to evaluate.
         context: Optional reference text for faithfulness / hallucination checks.
-        provider: Optional LLMProvider instance (defaults to GeminiProvider).
+        provider: Optional LLMProvider instance.
         config: Optional EvaluatorConfig for weights and settings.
         **kwargs: Additional overrides for EvaluatorConfig (e.g. model, temperature).
 
@@ -213,3 +230,34 @@ def evaluate(
 
     evaluator = Evaluator(provider=provider, config=config)
     return evaluator.evaluate(prompt=prompt, response=response, context=context)
+
+
+async def aevaluate(
+    prompt: str,
+    response: str,
+    context: str | None = None,
+    *,
+    provider: LLMProvider | None = None,
+    config: EvaluatorConfig | None = None,
+    **kwargs: Any,
+) -> EvaluationResult:
+    """Asynchronously evaluate an LLM response against a prompt and optional context.
+
+    Example:
+        >>> import asyncio
+        >>> from ai_dev_toolkit import aevaluate
+        >>> result = asyncio.run(aevaluate(
+        ...     prompt="What is the capital of France?",
+        ...     response="Paris",
+        ... ))
+        >>> print(result.overall)
+    """
+    return await asyncio.to_thread(
+        evaluate,
+        prompt=prompt,
+        response=response,
+        context=context,
+        provider=provider,
+        config=config,
+        **kwargs,
+    )
