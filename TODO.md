@@ -110,15 +110,15 @@ Rule: finish each phase's **Exit check** before starting the next. Don't touch d
 ---
 
 ## Phase 8: Community files
-- [ ] Full `README.md`: what/why, install, quickstart, CLI usage, JSON schema, limitations of LLM-as-judge, roadmap, badges
-- [ ] `CONTRIBUTING.md`: dev setup, running tests, how to add a metric, how to add a provider, PR process
-- [ ] `CODE_OF_CONDUCT.md` (Contributor Covenant)
-- [ ] `CHANGELOG.md` (Keep a Changelog format)
-- [ ] `.github/ISSUE_TEMPLATE/bug_report.md` and `feature_request.md`
-- [ ] `.github/pull_request_template.md`
-- [ ] Create the labels from PRD §13
-- [ ] Enable GitHub Discussions
-- [ ] Add `SECURITY.md` (how to report vulnerabilities)
+- [x] Full `README.md`: what/why, install, quickstart, CLI usage, JSON schema, limitations of LLM-as-judge, roadmap, badges
+- [x] `CONTRIBUTING.md`: dev setup, running tests, how to add a metric, how to add a provider, PR process
+- [x] `CODE_OF_CONDUCT.md` (Contributor Covenant)
+- [x] `CHANGELOG.md` (Keep a Changelog format)
+- [x] `.github/ISSUE_TEMPLATE/bug_report.md` and `feature_request.md`
+- [x] `.github/pull_request_template.md`
+- [x] Create the labels from PRD §13
+- [x] Enable GitHub Discussions
+- [x] Add `SECURITY.md` (how to report vulnerabilities)
 
 **Exit check:** a stranger can clone, set up, and run tests by following only CONTRIBUTING.md.
 

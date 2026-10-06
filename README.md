@@ -1,21 +1,216 @@
-# AI Dev Toolkit (`ai-dev-toolkit`)
+# AI Dev Toolkit
 
-[![PyPI version](https://img.shields.io/pypi/v/ai-dev-toolkit.svg)](https://pypi.org/project/ai-dev-toolkit/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Tests](https://github.com/H31S3NB3R4/ai-dev-toolkit/actions/workflows/tests.yml/badge.svg)](https://github.com/H31S3NB3R4/ai-dev-toolkit/actions/workflows/tests.yml)
+[![Python Version](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](https://pypi.org/project/ai-dev-toolkit/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
-> Open-source evaluation and testing toolkit for LLM, RAG, and AI agents.
+> **Open-source evaluation and testing toolkit for LLMs, RAG pipelines, and AI agents.**
 
-*Status: Work in progress (v0.1.0 in active development)*
+AI Dev Toolkit gives developers and teams a fast, deterministic, lightweight framework to score model outputs, measure factual grounding, prevent hallucinations, and gate CI/CD deployments.
 
-## Quick Summary
+---
 
-AI Dev Toolkit is a lightweight, modular library to help developers evaluate, test, and debug LLM outputs. It enables one-call evaluation of LLM answers against relevance, completeness, and faithfulness metrics with structured JSON output ready for CI/CD gates.
+## ⚡ Key Features
 
-## Roadmap & Features (v0.1.0)
+- **3-Line Python Quickstart**: Score any LLM response in a single function call.
+- **Core Evaluation Metrics**:
+  - **Relevance**: Does the response directly answer the prompt?
+  - **Completeness**: Are all sub-questions and aspects of the prompt covered?
+  - **Faithfulness**: Is every claim grounded in the provided context?
+  - **Hallucination Rate**: Automatically computed as `1.0 - faithfulness`.
+- **Flexible LLM Judges**: Built-in `GeminiProvider` (powered by official `google-genai` SDK) and zero-cost offline `FakeProvider`.
+- **Fast Concurrent Scoring**: Runs enabled metrics in parallel via thread pools.
+- **Developer-Friendly CLI**: `ai-dev evaluate` with color-coded terminal tables, raw JSON output, and `--min-score` CI gating.
+- **Prompt Injection Defense**: Untrusted text is safely isolated in structured delimiters with strict judge guard instructions.
+- **Zero Telemetry & Secure**: API keys are never stored in code, logs, or exceptions.
 
-- **One-call evaluation**: `evaluate(prompt, response, context=None)`
-- **Core metrics**: Relevance, Completeness, Faithfulness (Hallucination = 1 - Faithfulness)
-- **Providers**: Gemini (via official SDK), offline FakeProvider for zero-cost testing
-- **CLI**: `ai-dev evaluate` with exit code gating on score thresholds
-- **Developer-friendly**: Strict types, 100% offline unit tests, clean Pydantic data models
+---
+
+## 📦 Installation
+
+```bash
+pip install ai-dev-toolkit
+```
+
+For development and testing tools:
+
+```bash
+pip install "ai-dev-toolkit[dev]"
+```
+
+---
+
+## 🚀 Quickstart (Python API)
+
+Set your Gemini API key in your environment or `.env` file:
+
+```bash
+export GEMINI_API_KEY="your-gemini-api-key"
+```
+
+### Basic Evaluation
+
+```python
+from ai_dev_toolkit import evaluate
+
+result = evaluate(
+    prompt="What are the differences between Python lists and tuples?",
+    response="Lists are mutable and use square brackets. Tuples are immutable and use parentheses.",
+)
+
+print(f"Overall Score: {result.overall * 100:.1f}%")
+print(f"Relevance:     {result.relevance * 100:.1f}%")
+print(f"Completeness:  {result.completeness * 100:.1f}%")
+```
+
+### RAG & Faithfulness Evaluation
+
+Provide reference context to verify factual grounding:
+
+```python
+result = evaluate(
+    prompt="What is the capital of Australia?",
+    response="Sydney is the capital of Australia.",
+    context="Canberra is the capital city of Australia.",
+)
+
+print(f"Faithfulness:  {result.faithfulness}")  # e.g. 0.0
+print(f"Hallucination: {result.hallucination}")  # e.g. 1.0
+print(f"Reasoning:     {result.reasoning['faithfulness']}")
+```
+
+---
+
+## 💻 CLI Usage
+
+The toolkit includes the `ai-dev` command line interface:
+
+### Evaluate Direct Inputs
+
+```bash
+ai-dev evaluate \
+  --prompt "Explain quantum computing in one sentence." \
+  --response "Quantum computing uses quantum bits (qubits) to perform complex computations."
+```
+
+### Evaluate with Grounding Context & Gating
+
+```bash
+ai-dev evaluate \
+  --prompt "What is the capital of France?" \
+  --response "Paris is the capital of France." \
+  --context "Paris is the capital city of France." \
+  --min-score 0.8
+```
+
+### JSON Output for CI/CD Pipelines
+
+```bash
+ai-dev evaluate \
+  --prompt-file prompt.txt \
+  --response-file response.txt \
+  --json > result.json
+```
+
+### CLI Options
+
+| Option | Flag | Description |
+|---|---|---|
+| `--prompt` | `-p` | Prompt text given to the model |
+| `--response` | `-r` | Response generated by the model |
+| `--context` | `-c` | Reference context for faithfulness evaluation |
+| `--prompt-file` | | Path to file containing prompt text |
+| `--response-file` | | Path to file containing response text |
+| `--context-file` | | Path to file containing reference context |
+| `--provider` | | Provider name (`gemini`, `fake`) |
+| `--model` | `-m` | Model name override (e.g. `gemini-2.5-flash`) |
+| `--min-score` | | Minimum overall score threshold (exits with code 1 if below) |
+| `--json` | | Output formatted JSON instead of terminal table |
+| `--reasoning` | | Include judge reasoning column in terminal table |
+| `--version` | `-v` | Show installed toolkit version |
+
+---
+
+## 📊 Result Schema
+
+`EvaluationResult.to_dict()` / `to_json()` outputs a standardized JSON structure:
+
+```json
+{
+  "relevance": 1.0,
+  "completeness": 1.0,
+  "faithfulness": 1.0,
+  "hallucination": 0.0,
+  "overall": 1.0,
+  "reasoning": {
+    "relevance": "The response directly answers the user prompt.",
+    "completeness": "All requested points are addressed.",
+    "faithfulness": "All claims are supported by the provided context."
+  },
+  "metadata": {
+    "provider": "gemini",
+    "model": "gemini-2.5-flash",
+    "toolkit_version": "0.1.0",
+    "latency_ms": 1240.5
+  }
+}
+```
+
+---
+
+## ⚙️ Custom Weights & Configuration
+
+Customize metric weighting and execution behavior with `EvaluatorConfig`:
+
+```python
+from ai_dev_toolkit import EvaluatorConfig, evaluate
+
+config = EvaluatorConfig(
+    relevance_weight=0.50,
+    completeness_weight=0.30,
+    faithfulness_weight=0.20,
+    temperature=0.0,
+    timeout=45.0,
+)
+
+result = evaluate(
+    prompt="Explain photosynthesis",
+    response="Plants convert light into chemical energy.",
+    config=config,
+)
+```
+
+---
+
+## 🔍 Limitations of LLM-as-a-Judge
+
+While LLM-as-a-judge is a powerful technique for evaluating nuanced, open-ended natural language, developers should keep the following considerations in mind:
+
+1. **Model Bias**: Judge models may exhibit position bias, verbosity bias, or self-enhancement bias.
+2. **Deterministic Configuration**: Always use temperature `0.0` for reproducibility.
+3. **Prompt Injection**: Malicious responses can attempt to steer judges. AI Dev Toolkit mitigates this with strict delimiter wrapping and guard prompts, but domain-specific validation is recommended for mission-critical systems.
+4. **Context Window & Cost**: Batching large numbers of requests incurs LLM API costs. Use `FakeProvider` for tests and CI pipelines.
+
+---
+
+## 🗺️ Roadmap
+
+- [x] **v0.1.0 (MVP)**: Core evaluation engine, `Relevance`, `Completeness`, `Faithfulness`, `GeminiProvider`, `FakeProvider`, CLI, CI pipeline.
+- [ ] **v0.2.0**: OpenAI & Ollama providers, custom metric registration API, YAML/TOML config files, dataset batch evaluation.
+- [ ] **v0.3.0**: Advanced RAG metrics (context recall, answer relevance, citation correctness), benchmark reporting.
+- [ ] **v0.4.0**: Agent & tool-call evaluation, step tracing, cost/token tracking.
+- [ ] **v0.5.0**: Experiment tracking and interactive web dashboard.
+- [ ] **v1.0.0**: Stable plugin ecosystem and documentation site.
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for local development setup, test execution, and instructions on how to add custom metrics or providers.
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
