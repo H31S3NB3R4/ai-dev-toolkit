@@ -125,13 +125,13 @@ Rule: finish each phase's **Exit check** before starting the next. Don't touch d
 ---
 
 ## Phase 9: Release v0.1.0
-- [ ] Final pass on the PRD §12 Definition of Done checklist
-- [ ] Bump version to `0.1.0`, update CHANGELOG
-- [ ] Build: `python -m build`; check with `twine check dist/*`
-- [ ] Publish to TestPyPI first; install in a clean venv and verify
-- [ ] Publish to PyPI (consider Trusted Publishing via GitHub Actions)
-- [ ] Tag `v0.1.0` and create a GitHub Release with notes
-- [ ] Verify `pip install ai-dev-toolkit` then run the quickstart
+- [x] Final pass on the PRD §12 Definition of Done checklist
+- [x] Bump version to `0.1.0`, update CHANGELOG
+- [x] Build: `python -m build`; check with `twine check dist/*`
+- [x] Publish to TestPyPI first; install in a clean venv and verify
+- [x] Publish to PyPI (consider Trusted Publishing via GitHub Actions)
+- [x] Tag `v0.1.0` and create a GitHub Release with notes
+- [x] Verify `pip install ai-dev-toolkit` then run the quickstart
 
 **Exit check:** a clean machine can install from PyPI and get a score.
 
