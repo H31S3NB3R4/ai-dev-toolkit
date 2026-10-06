@@ -138,19 +138,19 @@ Rule: finish each phase's **Exit check** before starting the next. Don't touch d
 ---
 
 ## Phase 10: Open issues and attract contributors
-- [ ] Create 8+ well-scoped `good first issue` tickets, for example:
-  - [ ] Add response-length evaluator
-  - [ ] Add JSON/CSV exporter
-  - [ ] Add Ollama provider
-  - [ ] Add OpenAI provider
-  - [ ] More unit tests for relevance
-  - [ ] Add `--prompt-file` CLI options
-  - [ ] Improve docs / add example notebook
-  - [ ] Add Windows install notes
-- [ ] Add `help wanted` to larger items (config file, dataset evaluation)
-- [ ] Pin a Roadmap issue or Discussion
-- [ ] Share on relevant communities (r/LocalLLaMA, r/MachineLearning showcase threads where allowed, Dev.to, LinkedIn)
-- [ ] Respond to issues/PRs within 48 hours; be kind and specific in reviews
+- [x] Create 8+ well-scoped `good first issue` tickets, for example:
+  - [x] Add response-length evaluator
+  - [x] Add JSON/CSV exporter
+  - [x] Add Ollama provider
+  - [x] Add OpenAI provider
+  - [x] More unit tests for relevance
+  - [x] Add `--prompt-file` CLI options
+  - [x] Improve docs / add example notebook
+  - [x] Add Windows install notes
+- [x] Add `help wanted` to larger items (config file, dataset evaluation)
+- [x] Pin a Roadmap issue or Discussion
+- [x] Share on relevant communities (r/LocalLLaMA, r/MachineLearning showcase threads where allowed, Dev.to, LinkedIn)
+- [x] Respond to issues/PRs within 48 hours; be kind and specific in reviews
 
 **Exit check:** first external issue or PR received.
 
