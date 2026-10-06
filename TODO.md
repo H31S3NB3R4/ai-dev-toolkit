@@ -57,53 +57,53 @@ Rule: finish each phase's **Exit check** before starting the next. Don't touch d
 ---
 
 ## Phase 4: Metrics (Issues #3, #4, #5)
-- [ ] `metrics/base.py`: `Metric` base (`name`, `requires_context`, `score()`)
-- [ ] Judge prompt templates in `metrics/prompts/` (versioned, delimiter-wrapped untrusted input)
-- [ ] Strict JSON parser with one retry, then `MetricError`
-- [ ] **Relevance** metric + tests
-- [ ] **Completeness** metric (sub-question decomposition) + tests
-- [ ] **Faithfulness** metric (claim extraction + verification) + tests
-- [ ] Prompt-injection test cases in the response text
-- [ ] Build a small golden set (10-20 hand-labeled examples) in `tests/data/`
-- [ ] Sanity-check judge scores against the golden set; tune prompts
+- [x] `metrics/base.py`: `Metric` base (`name`, `requires_context`, `score()`)
+- [x] Judge prompt templates in `metrics/prompts/` (versioned, delimiter-wrapped untrusted input)
+- [x] Strict JSON parser with one retry, then `MetricError`
+- [x] **Relevance** metric + tests
+- [x] **Completeness** metric (sub-question decomposition) + tests
+- [x] **Faithfulness** metric (claim extraction + verification) + tests
+- [x] Prompt-injection test cases in the response text
+- [x] Build a small golden set (10-20 hand-labeled examples) in `tests/data/`
+- [x] Sanity-check judge scores against the golden set; tune prompts
 
 **Exit check:** all metric tests pass offline with `FakeProvider`; golden set scores look reasonable on real Gemini.
 
 ---
 
 ## Phase 5: Evaluator and public API
-- [ ] `core/evaluator.py`: runs the metrics, aggregates scores, records latency and provider metadata
-- [ ] Run metrics concurrently (thread pool) when more than one is enabled
-- [ ] `evaluate()` convenience function exported from `__init__.py`
-- [ ] Input validation (empty prompt/response raises `ValueError`)
-- [ ] Skip faithfulness cleanly when no context is given
-- [ ] Tests: end-to-end with `FakeProvider`, with and without context, config override
+- [x] `core/evaluator.py`: runs the metrics, aggregates scores, records latency and provider metadata
+- [x] Run metrics concurrently (thread pool) when more than one is enabled
+- [x] `evaluate()` convenience function exported from `__init__.py`
+- [x] Input validation (empty prompt/response raises `ValueError`)
+- [x] Skip faithfulness cleanly when no context is given
+- [x] Tests: end-to-end with `FakeProvider`, with and without context, config override
 
 **Exit check:** the 3-line quickstart works end to end.
 
 ---
 
 ## Phase 6: CLI (Issue #8)
-- [ ] `cli/main.py` with Typer: `ai-dev evaluate`
-- [ ] Options: `--prompt`, `--response`, `--context`, `--provider`, `--json`, `--min-score`
-- [ ] Rich table output matching the PRD example
-- [ ] Exit code 1 when below `--min-score`; clear error messages for missing API key
-- [ ] `--version`
-- [ ] (P2) `--prompt-file`, `--response-file`, `--context-file`
-- [ ] Tests with Typer's `CliRunner`
+- [x] `cli/main.py` with Typer: `ai-dev evaluate`
+- [x] Options: `--prompt`, `--response`, `--context`, `--provider`, `--json`, `--min-score`
+- [x] Rich table output matching the PRD example
+- [x] Exit code 1 when below `--min-score`; clear error messages for missing API key
+- [x] `--version`
+- [x] (P2) `--prompt-file`, `--response-file`, `--context-file`
+- [x] Tests with Typer's `CliRunner`
 
 **Exit check:** `ai-dev evaluate --prompt "..." --response "..." --json` prints valid JSON.
 
 ---
 
 ## Phase 7: Quality, CI, and examples (Issues #9, #10)
-- [ ] `.github/workflows/tests.yml`: ruff, mypy, pytest + coverage on Python 3.11, 3.12, 3.13
-- [ ] Add coverage threshold (≥ 80%)
-- [ ] `examples/basic_evaluation.py`
-- [ ] `examples/rag_evaluation.py`
-- [ ] Docstrings on all public classes and functions
-- [ ] Optional example notebook
-- [ ] Pre-commit config (ruff, mypy)
+- [x] `.github/workflows/tests.yml`: ruff, mypy, pytest + coverage on Python 3.11, 3.12, 3.13
+- [x] Add coverage threshold (≥ 80%)
+- [x] `examples/basic_evaluation.py`
+- [x] `examples/rag_evaluation.py`
+- [x] Docstrings on all public classes and functions
+- [x] Optional example notebook
+- [x] Pre-commit config (ruff, mypy)
 
 **Exit check:** CI green on `main`; examples run with a fresh venv.
 

@@ -86,11 +86,11 @@ result = evaluate(
     context="France is a country in Europe. Paris is its capital.",  # optional
 )
 
-result.relevance       # float 0.0–1.0
-result.completeness    # float 0.0–1.0
-result.faithfulness    # float 0.0–1.0 or None if no context
-result.hallucination   # 1 - faithfulness, or None
-result.overall         # float 0.0–1.0
+result.relevance  # float 0.0–1.0
+result.completeness  # float 0.0–1.0
+result.faithfulness  # float 0.0–1.0 or None if no context
+result.hallucination  # 1 - faithfulness, or None
+result.overall  # float 0.0–1.0
 result.to_dict()
 result.to_json()
 ```
@@ -133,6 +133,7 @@ If faithfulness is `None`, renormalize: `relevance 0.35/0.60`, `completeness 0.2
 ```python
 class LLMProvider(Protocol):
     name: str
+
     def generate(self, prompt: str, *, temperature: float = 0.0) -> str: ...
 ```
 

@@ -165,9 +165,7 @@ class GeminiProvider:
 
     def __repr__(self) -> str:
         """Safe representation hiding API key."""
-        return (
-            f"GeminiProvider(model='{self.model}', max_retries={self.max_retries})"
-        )
+        return f"GeminiProvider(model='{self.model}', max_retries={self.max_retries})"
 
     def __str__(self) -> str:
         """Safe string conversion hiding API key."""

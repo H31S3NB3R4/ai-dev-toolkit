@@ -77,4 +77,4 @@ files = ["src", "tests"]
 minversion = "8.0"
 testpaths = ["tests"]
 pythonpath = ["src"]
-addopts = "-ra --strict-markers --cov=src/ai_dev_toolkit --cov-report=term-missing"
+addopts = "-ra --strict-markers -p no:langsmith_plugin --cov=src/ai_dev_toolkit --cov-report=term-missing --cov-fail-under=80"

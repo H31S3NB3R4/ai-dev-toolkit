@@ -66,9 +66,7 @@ class EvaluatorConfig(BaseModel):
     def validate_weights(self) -> "EvaluatorConfig":
         """Ensure total weight sum is strictly positive."""
         total = (
-            self.relevance_weight
-            + self.completeness_weight
-            + self.faithfulness_weight
+            self.relevance_weight + self.completeness_weight + self.faithfulness_weight
         )
         if total <= 0.0:
             raise ValueError("Total metric weight sum must be greater than 0.")

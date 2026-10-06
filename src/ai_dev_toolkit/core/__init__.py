@@ -6,6 +6,7 @@ from ai_dev_toolkit.core.errors import (
     MetricError,
     ProviderError,
 )
+from ai_dev_toolkit.core.evaluator import Evaluator, evaluate
 from ai_dev_toolkit.core.result import (
     EvaluationMetadata,
     EvaluationResult,
@@ -22,6 +23,8 @@ __all__ = [
     "EvaluationMetadata",
     "EvaluationResult",
     "MetricResult",
+    "Evaluator",
+    "evaluate",
     "calculate_overall",
     "clamp_score",
 ]

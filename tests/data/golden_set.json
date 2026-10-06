@@ -1,0 +1,122 @@
+[
+  {
+    "id": "golden_01",
+    "prompt": "What is the capital of France?",
+    "response": "The capital of France is Paris.",
+    "context": "France is a country in Western Europe. Its capital city is Paris, which is known for the Eiffel Tower.",
+    "expected": {"relevance": 1.0, "completeness": 1.0, "faithfulness": 1.0},
+    "tags": ["simple", "factual"]
+  },
+  {
+    "id": "golden_02",
+    "prompt": "What is the capital of France?",
+    "response": "I enjoy eating pizza on Fridays.",
+    "context": null,
+    "expected": {"relevance": 0.0, "completeness": 0.0, "faithfulness": null},
+    "tags": ["irrelevant"]
+  },
+  {
+    "id": "golden_03",
+    "prompt": "Explain the benefits and drawbacks of remote work.",
+    "response": "Remote work offers flexibility and eliminates commuting time.",
+    "context": null,
+    "expected": {"relevance": 0.7, "completeness": 0.4, "faithfulness": null},
+    "tags": ["partial", "incomplete"]
+  },
+  {
+    "id": "golden_04",
+    "prompt": "What are the three states of matter?",
+    "response": "The three states of matter are solid, liquid, and gas. Each state has different molecular arrangements and energy levels.",
+    "context": "Matter exists in three fundamental states: solid, liquid, and gas. In solids, molecules are tightly packed. In liquids, they flow freely. In gases, they move rapidly.",
+    "expected": {"relevance": 1.0, "completeness": 1.0, "faithfulness": 1.0},
+    "tags": ["factual", "complete"]
+  },
+  {
+    "id": "golden_05",
+    "prompt": "What is the population of Tokyo?",
+    "response": "Tokyo has a population of approximately 50 million people.",
+    "context": "Tokyo, the capital of Japan, has a population of about 14 million in the city proper and around 37 million in the greater metropolitan area.",
+    "expected": {"relevance": 0.8, "completeness": 0.7, "faithfulness": 0.3},
+    "tags": ["hallucination", "inaccurate"]
+  },
+  {
+    "id": "golden_06",
+    "prompt": "What programming language is Python?",
+    "response": "Python is a high-level, interpreted programming language known for its clear syntax and readability. It was created by Guido van Rossum.",
+    "context": "Python is a high-level, general-purpose programming language. It was created by Guido van Rossum and first released in 1991.",
+    "expected": {"relevance": 1.0, "completeness": 0.9, "faithfulness": 1.0},
+    "tags": ["factual", "faithful"]
+  },
+  {
+    "id": "golden_07",
+    "prompt": "List the planets in our solar system.",
+    "response": "Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune.",
+    "context": null,
+    "expected": {"relevance": 1.0, "completeness": 1.0, "faithfulness": null},
+    "tags": ["list", "complete"]
+  },
+  {
+    "id": "golden_08",
+    "prompt": "Explain how photosynthesis works.",
+    "response": "Photosynthesis converts sunlight into energy.",
+    "context": "Photosynthesis is the process by which green plants use sunlight, water, and carbon dioxide to create oxygen and energy in the form of sugar. It occurs primarily in the chloroplasts of plant cells.",
+    "expected": {"relevance": 0.8, "completeness": 0.3, "faithfulness": 0.8},
+    "tags": ["partial", "vague"]
+  },
+  {
+    "id": "golden_09",
+    "prompt": "What causes earthquakes?",
+    "response": "Earthquakes are caused by the movement of tectonic plates beneath the Earth's surface. When plates collide, separate, or slide past each other, the energy released creates seismic waves.",
+    "context": "Earthquakes occur due to the sudden release of energy in the Earth's crust, primarily caused by tectonic plate movements. The boundaries where plates meet are especially prone to seismic activity.",
+    "expected": {"relevance": 1.0, "completeness": 0.9, "faithfulness": 1.0},
+    "tags": ["factual", "complete", "faithful"]
+  },
+  {
+    "id": "golden_10",
+    "prompt": "What is machine learning?",
+    "response": "Machine learning is a subset of artificial intelligence that enables computers to learn from data without being explicitly programmed. It uses algorithms to identify patterns and make predictions.",
+    "context": null,
+    "expected": {"relevance": 1.0, "completeness": 0.8, "faithfulness": null},
+    "tags": ["definition", "no_context"]
+  },
+  {
+    "id": "golden_11",
+    "prompt": "What are the health benefits of green tea?",
+    "response": "Green tea cures cancer and guarantees weight loss within a week.",
+    "context": "Green tea contains antioxidants called catechins. Studies suggest it may help reduce the risk of certain cancers and support weight management, though results vary. It is not a cure for any disease.",
+    "expected": {"relevance": 0.6, "completeness": 0.3, "faithfulness": 0.1},
+    "tags": ["hallucination", "exaggeration"]
+  },
+  {
+    "id": "golden_12",
+    "prompt": "Compare SQL and NoSQL databases.",
+    "response": "SQL databases use structured tables with predefined schemas and support ACID transactions. NoSQL databases offer flexible schemas, horizontal scaling, and are suited for unstructured data. SQL is better for complex queries, while NoSQL excels at handling large volumes of varied data.",
+    "context": null,
+    "expected": {"relevance": 1.0, "completeness": 0.9, "faithfulness": null},
+    "tags": ["comparison", "complete"]
+  },
+  {
+    "id": "golden_13",
+    "prompt": "What is the boiling point of water?",
+    "response": "The boiling point of water is 100 degrees Celsius or 212 degrees Fahrenheit at standard atmospheric pressure.",
+    "context": "Water boils at 100°C (212°F) at standard atmospheric pressure (1 atm). At higher altitudes, water boils at lower temperatures due to reduced pressure.",
+    "expected": {"relevance": 1.0, "completeness": 0.8, "faithfulness": 1.0},
+    "tags": ["factual", "faithful"]
+  },
+  {
+    "id": "golden_14",
+    "prompt": "Explain the theory of relativity.",
+    "response": "It's a theory by Einstein.",
+    "context": null,
+    "expected": {"relevance": 0.5, "completeness": 0.1, "faithfulness": null},
+    "tags": ["vague", "incomplete"]
+  },
+  {
+    "id": "golden_15",
+    "prompt": "What year was the Eiffel Tower built?",
+    "response": "The Eiffel Tower was built in 1920 and is located in Berlin, Germany.",
+    "context": "The Eiffel Tower was constructed from 1887 to 1889 and is located in Paris, France. It was built as the entrance arch for the 1889 World's Fair.",
+    "expected": {"relevance": 0.6, "completeness": 0.5, "faithfulness": 0.0},
+    "tags": ["hallucination", "factually_wrong"]
+  }
+]

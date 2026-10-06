@@ -1,6 +1,19 @@
 """Fake LLM provider for zero-cost offline testing and development."""
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
+
+
+def _default_fallback_response(prompt: str) -> str:
+    if "extract all factual claims" in prompt.lower():
+        return '{"claims": ["Mock claim."]}'
+    if "verify whether each factual claim" in prompt.lower():
+        return (
+            '{"verdicts": [{"claim": "Mock claim.", "supported": true}], '
+            '"score": 1.0, "reasoning": "Mock verified"}'
+        )
+    return (
+        '{"score": 1.0, "sub_questions": ["Mock question"], "reasoning": "Mock score"}'
+    )
 
 
 class FakeProvider:
@@ -8,8 +21,10 @@ class FakeProvider:
 
     def __init__(
         self,
-        responses: str | Sequence[str] | Mapping[str, str] | None = None,
-        default_response: str = "{}",
+        responses: (
+            str | Sequence[str] | Mapping[str, str] | Callable[..., str] | None
+        ) = None,
+        default_response: str | None = None,
         error_to_raise: Exception | None = None,
     ) -> None:
         """Initialize FakeProvider with scripted responses or errors.
@@ -40,7 +55,18 @@ class FakeProvider:
             raise self._error_to_raise
 
         if self._responses is None:
-            return self._default_response
+            if self._default_response is not None:
+                return self._default_response
+            return _default_fallback_response(prompt)
+
+        if callable(self._responses):
+            try:
+                return self._responses(prompt, temperature=temperature)
+            except TypeError:
+                try:
+                    return self._responses(prompt, temperature)
+                except TypeError:
+                    return self._responses(prompt)
 
         if isinstance(self._responses, str):
             return self._responses
