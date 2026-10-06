@@ -9,6 +9,7 @@ from rich.table import Table
 
 from ai_dev_toolkit._version import __version__
 from ai_dev_toolkit.core.config import EvaluatorConfig
+from ai_dev_toolkit.core.dataset import evaluate_dataset
 from ai_dev_toolkit.core.errors import AIDevToolkitError
 from ai_dev_toolkit.core.evaluator import evaluate
 
@@ -190,6 +191,123 @@ def evaluate_cmd(
                 error_console.print(
                     f"\n[bold red]Threshold check failed:[/bold red] "
                     f"Overall score {result.overall:.2f} is below "
+                    f"minimum threshold {min_score:.2f}."
+                )
+            raise typer.Exit(code=1)
+
+
+@app.command(name="dataset")
+def dataset_cmd(
+    input_file: Annotated[
+        Path,
+        typer.Argument(
+            help="Path to dataset file (.jsonl, .json, or .csv).",
+            exists=True,
+            file_okay=True,
+            dir_okay=False,
+            readable=True,
+        ),
+    ],
+    output_csv: Annotated[
+        Path | None,
+        typer.Option("--output-csv", "-o", help="Path to export results as CSV."),
+    ] = None,
+    report_html: Annotated[
+        Path | None,
+        typer.Option("--report-html", help="Path to export HTML benchmark report."),
+    ] = None,
+    report_md: Annotated[
+        Path | None,
+        typer.Option("--report-md", help="Path to export Markdown benchmark report."),
+    ] = None,
+    provider: Annotated[
+        str | None,
+        typer.Option(
+            "--provider",
+            help="Judge provider override ('gemini', 'openai', 'ollama', 'fake').",
+        ),
+    ] = None,
+    model: Annotated[
+        str | None,
+        typer.Option("--model", "-m", help="Model name override for judge provider."),
+    ] = None,
+    min_score: Annotated[
+        float | None,
+        typer.Option(
+            "--min-score",
+            help="Fail with exit code 1 if mean overall score is below threshold.",
+        ),
+    ] = None,
+    json_output: Annotated[
+        bool,
+        typer.Option("--json", help="Output aggregate results as JSON."),
+    ] = False,
+) -> None:
+    """Evaluate a batch dataset (.jsonl, .json, .csv) and generate benchmark reports."""
+    config = EvaluatorConfig.find_and_load()
+    if provider:
+        config.provider = provider
+    if model:
+        config.model = model
+
+    try:
+        dataset_result = evaluate_dataset(dataset=input_file, config=config)
+    except Exception as e:
+        error_console.print(f"[bold red]Dataset evaluation failed:[/bold red] {e}")
+        raise typer.Exit(code=1) from e
+
+    # Export outputs if requested
+    if output_csv:
+        dataset_result.to_csv(output_csv)
+    if report_html:
+        dataset_result.to_html(report_html)
+    if report_md:
+        dataset_result.to_markdown(report_md)
+
+    if json_output:
+        print(dataset_result.to_json(indent=2))
+    else:
+        sample_cnt = dataset_result.total_samples
+        table = Table(
+            title=f"Dataset Evaluation Summary ({sample_cnt} samples)",
+            show_header=True,
+            header_style="bold cyan",
+            box=None,
+        )
+        table.add_column("Metric", style="bold", width=20)
+        table.add_column("Mean", justify="right", width=10)
+        table.add_column("Median", justify="right", width=10)
+        table.add_column("Min", justify="right", width=8)
+        table.add_column("Max", justify="right", width=8)
+        table.add_column("Count", justify="right", width=8)
+
+        for m_name, summary in dataset_result.summary.items():
+            mean_pct = _format_pct(summary.mean)
+            table.add_row(
+                m_name.replace("_", " ").title(),
+                mean_pct,
+                f"{summary.median:.2f}",
+                f"{summary.min:.2f}",
+                f"{summary.max:.2f}",
+                str(summary.count),
+            )
+
+        console.print()
+        console.print(table)
+        console.print()
+
+    # Min score check on dataset overall mean
+    if min_score is not None:
+        overall_mean = (
+            dataset_result.summary["overall"].mean
+            if "overall" in dataset_result.summary
+            else 0.0
+        )
+        if overall_mean < min_score:
+            if not json_output:
+                error_console.print(
+                    f"[bold red]Threshold check failed:[/bold red] "
+                    f"Mean overall score {overall_mean:.2f} is below "
                     f"minimum threshold {min_score:.2f}."
                 )
             raise typer.Exit(code=1)

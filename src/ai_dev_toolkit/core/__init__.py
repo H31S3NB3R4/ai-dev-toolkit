@@ -4,6 +4,7 @@ from ai_dev_toolkit.core.config import EvaluatorConfig
 from ai_dev_toolkit.core.dataset import (
     DatasetEvaluationResult,
     MetricSummary,
+    evaluate_batch,
     evaluate_dataset,
 )
 from ai_dev_toolkit.core.errors import (
@@ -32,6 +33,7 @@ __all__ = [
     "evaluate",
     "aevaluate",
     "evaluate_dataset",
+    "evaluate_batch",
     "DatasetEvaluationResult",
     "MetricSummary",
     "calculate_overall",

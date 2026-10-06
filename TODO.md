@@ -169,10 +169,15 @@ Rule: finish each phase's **Exit check** before starting the next. Don't touch d
 ---
 
 ## Phase 12: v0.3.0 (RAG evaluation)
-- [ ] Context relevance, context recall, answer relevance
-- [ ] Citation correctness
-- [ ] Batch evaluation, CSV/JSON datasets
-- [ ] Benchmark reports (Markdown/HTML)
+- [x] Context relevance, context recall, answer relevance
+- [x] Citation correctness
+- [x] Batch evaluation, CSV/JSON datasets
+- [x] Benchmark reports (Markdown/HTML)
+
+**Exit check:** all RAG metric and report tests pass (114 tests total, ≥80% coverage), `ruff check` clean.
+
+---
+
 
 ## Phase 13: v0.4.0 (agent evaluation)
 - [ ] Trace data model (steps, tool calls, failures)

@@ -3,8 +3,12 @@
 import inspect
 
 from ai_dev_toolkit.core.errors import MetricError
+from ai_dev_toolkit.metrics.answer_relevance import AnswerRelevanceMetric
 from ai_dev_toolkit.metrics.base import Metric
+from ai_dev_toolkit.metrics.citation import CitationCorrectnessMetric
 from ai_dev_toolkit.metrics.completeness import CompletenessMetric
+from ai_dev_toolkit.metrics.context_recall import ContextRecallMetric
+from ai_dev_toolkit.metrics.context_relevance import ContextRelevanceMetric
 from ai_dev_toolkit.metrics.faithfulness import FaithfulnessMetric
 from ai_dev_toolkit.metrics.relevance import RelevanceMetric
 
@@ -12,6 +16,10 @@ _DEFAULT_METRICS: dict[str, type[Metric]] = {
     "relevance": RelevanceMetric,
     "completeness": CompletenessMetric,
     "faithfulness": FaithfulnessMetric,
+    "context_relevance": ContextRelevanceMetric,
+    "context_recall": ContextRecallMetric,
+    "answer_relevance": AnswerRelevanceMetric,
+    "citation_correctness": CitationCorrectnessMetric,
 }
 
 _REGISTRY: dict[str, Metric | type[Metric]] = dict(_DEFAULT_METRICS)

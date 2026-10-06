@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.0] - 2026-10-07
+
+### Added
+- **RAG Evaluation Metrics**:
+  - `ContextRelevanceMetric`: Scores how relevant the retrieved context is to the user prompt.
+  - `ContextRecallMetric`: Scores whether the context contains necessary facts, with optional ground truth comparison.
+  - `AnswerRelevanceMetric`: Scores how directly the response addresses the question, independent of factual accuracy.
+  - `CitationCorrectnessMetric`: Verifies source citations in responses against context passages, with `citations_checked`/`citations_correct` metadata.
+  - All four RAG metrics registered in the global registry by default.
+- **Benchmark Reports**:
+  - `generate_markdown_report()`: GitHub-Flavored Markdown report with summary table, quality gate section, and per-sample detail table.
+  - `generate_html_report()`: Self-contained dark-mode HTML report with score badges, metric pills per sample, and responsive design.
+  - `DatasetEvaluationResult.to_markdown()`: Convenience method to generate and save Markdown reports.
+  - `DatasetEvaluationResult.to_html()`: Convenience method to generate and save HTML reports.
+- **Batch Evaluation**:
+  - `evaluate_batch()`: Evaluate in-memory lists of sample dicts (alias for `evaluate_dataset` with list input).
+  - `evaluate_dataset()` now accepts `metrics` parameter to run additional registered metrics per sample (e.g. `context_relevance`, `citation_correctness`).
+  - Context supports list-of-chunks format (`contexts: [...]`) auto-joined into a single context string.
+  - Ground truth / reference passthrough (`ground_truth`, `reference` fields) forwarded to metrics that support it.
+- **CLI `ai-dev dataset` command**:
+  - Evaluate batch datasets from the command line.
+  - `--output-csv`, `--report-html`, `--report-md` export flags.
+  - `--min-score` threshold gate (fails with exit code 1 if mean overall score is below threshold).
+  - Summary table printed to terminal with Rich formatting.
+- **Prompt Templates** (`v2` additions):
+  - `CONTEXT_RELEVANCE_PROMPT`, `CONTEXT_RECALL_PROMPT`, `ANSWER_RELEVANCE_PROMPT`, `CITATION_CORRECTNESS_PROMPT`.
+
+---
+
 ## [0.2.0] - 2026-10-07
 
 ### Added

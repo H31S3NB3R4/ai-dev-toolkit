@@ -1,4 +1,4 @@
-"""Dataset evaluation utilities and summary statistics aggregation."""
+"""Dataset evaluation utilities, batch execution, and summary statistics aggregation."""
 
 import csv
 import io
@@ -11,7 +11,12 @@ from pydantic import BaseModel, Field
 
 from ai_dev_toolkit.core.config import EvaluatorConfig
 from ai_dev_toolkit.core.evaluator import Evaluator
+from ai_dev_toolkit.metrics.registry import get_metric
 from ai_dev_toolkit.providers.base import LLMProvider
+from ai_dev_toolkit.reports.generator import (
+    generate_html_report,
+    generate_markdown_report,
+)
 
 
 class MetricSummary(BaseModel):
@@ -53,23 +58,69 @@ class DatasetEvaluationResult(BaseModel):
             out_path.write_text("", encoding="utf-8")
             return
 
-        fieldnames = [
+        # Determine all unique keys across results
+        keys_set: set[str] = set()
+        for r in self.results:
+            keys_set.update(r.keys())
+
+        # Sort with standard keys first
+        priority = [
             "id",
             "prompt",
             "response",
             "context",
+            "ground_truth",
             "overall",
             "relevance",
             "completeness",
             "faithfulness",
             "hallucination",
+            "context_relevance",
+            "context_recall",
+            "answer_relevance",
+            "citation_correctness",
         ]
+        fieldnames = [k for k in priority if k in keys_set] + sorted(
+            keys_set - set(priority)
+        )
 
         with open(out_path, mode="w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
             writer.writeheader()
             for r in self.results:
                 writer.writerow(r)
+
+    def to_markdown(
+        self,
+        filepath: str | Path | None = None,
+        title: str = "AI Dev Toolkit Benchmark Report",
+        min_score_threshold: float = 0.7,
+    ) -> str:
+        """Generate and optionally save a Markdown benchmark report."""
+        report = generate_markdown_report(
+            self, title=title, min_score_threshold=min_score_threshold
+        )
+        if filepath:
+            p = Path(filepath)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(report, encoding="utf-8")
+        return report
+
+    def to_html(
+        self,
+        filepath: str | Path | None = None,
+        title: str = "AI Dev Toolkit Benchmark Report",
+        min_score_threshold: float = 0.7,
+    ) -> str:
+        """Generate and optionally save a self-contained HTML benchmark report."""
+        report = generate_html_report(
+            self, title=title, min_score_threshold=min_score_threshold
+        )
+        if filepath:
+            p = Path(filepath)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(report, encoding="utf-8")
+        return report
 
 
 def _load_dataset_records(
@@ -130,14 +181,18 @@ def evaluate_dataset(
     dataset: str | Path | list[dict[str, Any]],
     provider: LLMProvider | None = None,
     config: EvaluatorConfig | None = None,
+    metrics: list[str] | None = None,
     max_workers: int = 4,
 ) -> DatasetEvaluationResult:
     """Evaluate a complete dataset of prompt/response samples.
 
     Args:
-        dataset: Path to dataset file (.jsonl, .json, .csv) or list of sample dicts.
+        dataset: Path to dataset file (.jsonl, .json, .csv) or list of
+            sample dicts.
         provider: Optional LLMProvider judge.
         config: Optional EvaluatorConfig.
+        metrics: Optional explicit list of metric names to score
+            (e.g. ['relevance', 'context_recall']).
         max_workers: Concurrency limit for processing dataset items.
 
     Returns:
@@ -148,32 +203,45 @@ def evaluate_dataset(
         return DatasetEvaluationResult(total_samples=0, summary={}, results=[])
 
     evaluator = Evaluator(provider=provider, config=config)
-
     evaluated_records: list[dict[str, Any]] = []
-    relevance_scores: list[float] = []
-    completeness_scores: list[float] = []
-    faithfulness_scores: list[float] = []
-    overall_scores: list[float] = []
+
+    # Map of metric_name -> list of float scores
+    metric_score_accum: dict[str, list[float]] = {
+        "overall": [],
+        "relevance": [],
+        "completeness": [],
+        "faithfulness": [],
+    }
+
+    # Instantiate any extra custom/RAG metrics requested
+    extra_metric_instances = {}
+    if metrics:
+        for m_name in metrics:
+            if m_name not in ("relevance", "completeness", "faithfulness"):
+                extra_metric_instances[m_name] = get_metric(m_name)
+                if m_name not in metric_score_accum:
+                    metric_score_accum[m_name] = []
 
     for idx, item in enumerate(records):
         item_id = item.get("id", f"sample_{idx + 1}")
         prompt = item.get("prompt", "")
         response = item.get("response", "")
-        context = item.get("context")
+
+        # Handle context as str or list of chunks
+        raw_context = item.get("context") or item.get("contexts")
+        if isinstance(raw_context, list):
+            context = "\n\n".join(str(c) for c in raw_context)
+        else:
+            context = str(raw_context) if raw_context is not None else None
+
+        ground_truth = item.get("ground_truth") or item.get("reference")
 
         if not prompt or not response:
             continue
 
         result = evaluator.evaluate(prompt=prompt, response=response, context=context)
 
-        relevance_scores.append(result.relevance)
-        completeness_scores.append(result.completeness)
-        overall_scores.append(result.overall)
-
-        if result.faithfulness is not None:
-            faithfulness_scores.append(result.faithfulness)
-
-        record_dict = {
+        record_dict: dict[str, Any] = {
             "id": item_id,
             "prompt": prompt,
             "response": response,
@@ -185,19 +253,58 @@ def evaluate_dataset(
             "hallucination": result.hallucination,
             "reasoning": result.reasoning,
         }
+
+        if ground_truth:
+            record_dict["ground_truth"] = ground_truth
+
+        metric_score_accum["overall"].append(result.overall)
+        metric_score_accum["relevance"].append(result.relevance)
+        metric_score_accum["completeness"].append(result.completeness)
+
+        if result.faithfulness is not None:
+            metric_score_accum["faithfulness"].append(result.faithfulness)
+
+        # Run extra metrics if specified
+        for m_name, m_inst in extra_metric_instances.items():
+            try:
+                m_res = m_inst.score(
+                    prompt=prompt,
+                    response=response,
+                    context=context,
+                    provider=evaluator.provider,
+                    ground_truth=ground_truth,
+                )
+                record_dict[m_name] = m_res.score
+                metric_score_accum[m_name].append(m_res.score)
+            except Exception:
+                record_dict[m_name] = None
+
         evaluated_records.append(record_dict)
 
-    summary: dict[str, MetricSummary] = {
-        "overall": _calculate_metric_summary(overall_scores),
-        "relevance": _calculate_metric_summary(relevance_scores),
-        "completeness": _calculate_metric_summary(completeness_scores),
-    }
-
-    if faithfulness_scores:
-        summary["faithfulness"] = _calculate_metric_summary(faithfulness_scores)
+    summary: dict[str, MetricSummary] = {}
+    for m_name, scores in metric_score_accum.items():
+        if scores:
+            summary[m_name] = _calculate_metric_summary(scores)
 
     return DatasetEvaluationResult(
         total_samples=len(evaluated_records),
         summary=summary,
         results=evaluated_records,
+    )
+
+
+def evaluate_batch(
+    records: list[dict[str, Any]],
+    provider: LLMProvider | None = None,
+    config: EvaluatorConfig | None = None,
+    metrics: list[str] | None = None,
+    max_workers: int = 4,
+) -> DatasetEvaluationResult:
+    """Evaluate a batch list of samples in memory."""
+    return evaluate_dataset(
+        dataset=records,
+        provider=provider,
+        config=config,
+        metrics=metrics,
+        max_workers=max_workers,
     )
